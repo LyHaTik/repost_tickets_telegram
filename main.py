@@ -43,9 +43,9 @@ shutdown_event = asyncio.Event()
 async def forward_messages(event):
     try:
         await client.send_message(your_tg_group_id, event.message)
-        print(f'{datetime.now()} INFO: OK! FORWARD MESSAGE.')
+        print(f'{datetime.now()} INFO: OK! FORWARD MESSAGE.', flush=True)
     except Exception as e:
-        print(f'{datetime.now()} ERROR: {e}')
+        print(f'{datetime.now()} ERROR: {e}', flush=True)
 
 
 async def main():
@@ -57,8 +57,7 @@ async def main():
     print(f'{datetime.now()} INFO: Bot stopped.', flush=True)
     await client.run_until_disconnected()
 
-def handle_shutdown(signum, frame):
-    """Вызывается при остановке контейнера (SIGTERM/SIGINT)."""
+def handle_shutdown(signum):
     print(f'{datetime.now()} INFO: Received shutdown signal ({signum}).', flush=True)
     shutdown_event.set()
 

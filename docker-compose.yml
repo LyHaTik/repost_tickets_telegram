@@ -5,6 +5,4 @@ services:
     restart: always
     env_file:
       - .env
-    volumes:
-      - ./my_tg_session_17809483.session:/app/my_tg_session_17809483.session
     command: python main.py
