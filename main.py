@@ -41,11 +41,67 @@ shutdown_event = asyncio.Event()
 
 @client.on(events.NewMessage(chats=listen_groups))
 async def forward_messages(event):
+    if not event.message:
+        # Сообщение пустое или сервисное — пропускаем
+        return
     try:
-        await client.send_message(your_tg_group_id, event.message)
+        # Проверяем, является ли сообщение частью альбома
+        if event.message.grouped_id:
+            # Получаем все сообщения с этим grouped_id (в альбоме)
+            messages = await client.get_messages(
+                entity=event.chat_id,
+                ids=range(event.message.id - 9, event.message.id + 1)  # Берём последние 10 сообщений
+            )
+            media_group = [m for m in messages if m.grouped_id == event.message.grouped_id]
+
+            for i, m in enumerate(media_group):
+                caption = m.text if i == 0 else None  # подпись только к первому медиа
+                if caption and len(caption) > 1024:
+                    long_caption = caption
+                    caption = None  # убираем подпись, текст отправим отдельно
+                else:
+                    long_caption = None
+
+                if m.media:
+                    await client.send_file(
+                        your_tg_group_id,
+                        file=m.media,
+                        caption=caption
+                    )
+
+                # Если подпись была слишком длинная — отправляем отдельно
+                if long_caption:
+                    await client.send_message(your_tg_group_id, long_caption)
+
+        # Если просто медиа (не альбом)
+        elif event.message.media:
+            caption = event.message.text
+            if caption and len(caption) > 1024:
+                long_caption = caption
+                caption = None
+            else:
+                long_caption = None
+
+            await client.send_file(
+                your_tg_group_id,
+                file=event.message.media,
+                caption=caption
+            )
+
+            if long_caption:
+                await client.send_message(your_tg_group_id, long_caption)
+
+        # Если просто текст
+        else:
+            if event.message.text:
+                await client.send_message(your_tg_group_id, event.message.text)
+
         print(f'{datetime.now()} INFO: OK! FORWARD MESSAGE.', flush=True)
+
     except Exception as e:
         print(f'{datetime.now()} ERROR: {e}', flush=True)
+
+
 
 
 async def main():
