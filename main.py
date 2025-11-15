@@ -68,10 +68,12 @@ async def forward_messages(event):
                         file=m.media,
                         caption=caption
                     )
+                    print(f'{datetime.now()} INFO: OK! FORWARD MESSAGE MEDIA.', flush=True)
 
                 # Если подпись была слишком длинная — отправляем отдельно
                 if long_caption:
                     await client.send_message(your_tg_group_id, long_caption)
+                    print(f'{datetime.now()} INFO: OK! FORWARD long_caption.', flush=True)
 
         # Если просто медиа (не альбом)
         elif event.message.media:
@@ -87,19 +89,20 @@ async def forward_messages(event):
                 file=event.message.media,
                 caption=caption
             )
+            print(f'{datetime.now()} INFO: OK! FORWARD MESSAGE MEDIA.', flush=True)
 
             if long_caption:
                 await client.send_message(your_tg_group_id, long_caption)
+                print(f'{datetime.now()} INFO: OK! FORWARD long_caption.', flush=True)
 
         # Если просто текст
         else:
             if event.message.text:
                 await client.send_message(your_tg_group_id, event.message.text)
-
-        print(f'{datetime.now()} INFO: OK! FORWARD MESSAGE.', flush=True)
+                print(f'{datetime.now()} INFO: OK! FORWARD MESSAGE.', flush=True)
 
     except Exception as e:
-        print(f'{datetime.now()} ERROR: {e}', flush=True)
+        print(f'{datetime.now()} ERROR: {e}\n MESSAGE: {event.message}', flush=True)
 
 
 
